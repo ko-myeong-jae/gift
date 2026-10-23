@@ -130,6 +130,48 @@ body{
 @keyframes breathe{0%,100%{opacity:.6;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
 @keyframes blink{0%,100%{opacity:.45}50%{opacity:1}}
 @keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+/* 춤추는 쥐 (양쪽 아래 고정) */
+.stage{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+.dancer{
+  position:fixed;z-index:16;pointer-events:none;
+  bottom:calc(8px + env(safe-area-inset-bottom,0px));
+  width:clamp(64px,19vw,100px);height:auto;overflow:visible;
+}
+.dancer.left{left:max(4px,env(safe-area-inset-left,0px))}
+.dancer.right{right:max(4px,env(safe-area-inset-right,0px));transform:scaleX(-1)}
+.dancer *{transform-box:view-box}
+.dancer .all{transform-origin:60px 140px;animation:groove .9s cubic-bezier(.5,0,.5,1) infinite}
+.dancer .torso{transform-origin:60px 130px;animation:hips .9s cubic-bezier(.5,0,.5,1) infinite}
+.dancer .head{transform-origin:60px 88px;animation:nod .9s cubic-bezier(.4,0,.3,1) infinite}
+.dancer .arm-l{transform-origin:36px 98px;animation:armL .9s cubic-bezier(.3,0,.2,1) infinite}
+.dancer .arm-r{transform-origin:84px 98px;animation:armR .9s cubic-bezier(.3,0,.2,1) infinite}
+.dancer .foot-l{transform-origin:45px 135px;animation:crossL .9s cubic-bezier(.45,0,.25,1) infinite}
+.dancer .foot-r{transform-origin:75px 135px;animation:crossR .9s cubic-bezier(.45,0,.25,1) infinite}
+.dancer .tail{transform-origin:84px 116px;animation:tail .45s ease-in-out infinite alternate}
+.dancer .hat{transform-origin:60px 40px;animation:hat .45s ease-in-out infinite alternate}
+.dancer.right *{animation-delay:-.45s}
+/* 박자마다 무릎을 굽히듯 아래로 툭 떨어지고, 좌우로 스텝 */
+@keyframes groove{
+  0%,100%{transform:translate(-5px,0) rotate(-5deg)}
+  25%{transform:translate(0,4px) rotate(0) scale(1.04,.94)}
+  50%{transform:translate(5px,0) rotate(5deg)}
+  75%{transform:translate(0,4px) rotate(0) scale(1.04,.94)}
+}
+@keyframes hips{0%,100%{transform:rotate(8deg)}50%{transform:rotate(-8deg)}}
+@keyframes nod{
+  0%,100%{transform:rotate(-9deg)}
+  25%{transform:translateY(4px) rotate(0)}
+  50%{transform:rotate(9deg)}
+  75%{transform:translateY(4px) rotate(0)}
+}
+/* 왼발이 오른발 앞으로 크로스 → 제자리 → 오른발이 왼발 앞으로 크로스 */
+@keyframes crossL{0%,50%,100%{transform:translate(0,0)}20%,30%{transform:translate(27px,-3px) rotate(-12deg)}}
+@keyframes crossR{0%,50%,100%{transform:translate(0,0)}70%,80%{transform:translate(-27px,-3px) rotate(12deg)}}
+@keyframes armL{0%,50%,100%{transform:rotate(30deg)}25%{transform:rotate(105deg)}75%{transform:rotate(-10deg)}}
+@keyframes armR{0%,50%,100%{transform:rotate(-30deg)}75%{transform:rotate(-105deg)}25%{transform:rotate(10deg)}}
+@keyframes tail{from{transform:rotate(-14deg)}to{transform:rotate(18deg)}}
+@keyframes hat{from{transform:rotate(-12deg)}to{transform:rotate(12deg)}}
+
 /* 유튜브 미니 플레이어 */
 .music{
   position:fixed;z-index:15;left:50%;transform:translateX(-50%);
@@ -146,7 +188,7 @@ body{
 .stage.has-music{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
 
 @media (prefers-reduced-motion:reduce){
-  .gift,.glow,.rays,.tap,.more.on{animation:none}
+  .gift,.glow,.rays,.tap,.more.on,.dancer *{animation:none}
 }
 </style>
 </head>
@@ -184,6 +226,73 @@ body{
   </main>
 </div>
 
+<svg class="dancer left" viewBox="0 0 120 145" aria-hidden="true">
+  <g class="all">
+    <path class="tail" d="M84 116 C106 120 114 100 106 88 C100 80 106 70 115 73" fill="none" stroke="#f4a7bb" stroke-width="4.5" stroke-linecap="round"/>
+    <g class="torso">
+    <ellipse cx="60" cy="108" rx="29" ry="28" fill="#dcd8f0"/>
+    <ellipse cx="60" cy="114" rx="18" ry="16" fill="#f8f6ff"/>
+    <g class="arm-l"><path d="M36 98 Q24 102 20 112" fill="none" stroke="#cfcae6" stroke-width="8" stroke-linecap="round"/><circle cx="20" cy="113" r="5" fill="#f4a7bb"/></g>
+    <g class="arm-r"><path d="M84 98 Q96 102 100 112" fill="none" stroke="#cfcae6" stroke-width="8" stroke-linecap="round"/><circle cx="100" cy="113" r="5" fill="#f4a7bb"/></g>
+    </g>
+    <ellipse class="foot-r" cx="75" cy="135" rx="11" ry="6" fill="#f4a7bb" stroke="#e48aa3" stroke-width="1.2"/>
+    <ellipse class="foot-l" cx="45" cy="135" rx="11" ry="6" fill="#f4a7bb" stroke="#e48aa3" stroke-width="1.2"/>
+    <g class="head">
+      <circle cx="35" cy="46" r="15" fill="#dcd8f0"/><circle cx="35" cy="46" r="9.5" fill="#f7b8c8"/>
+      <circle cx="85" cy="46" r="15" fill="#dcd8f0"/><circle cx="85" cy="46" r="9.5" fill="#f7b8c8"/>
+      <circle cx="60" cy="66" r="26" fill="#dcd8f0"/>
+      <ellipse cx="45" cy="74" rx="4.8" ry="2.8" fill="#ff9ec0" opacity=".75"/>
+      <ellipse cx="75" cy="74" rx="4.8" ry="2.8" fill="#ff9ec0" opacity=".75"/>
+      <circle cx="51" cy="65" r="3.8" fill="#2b2350"/><circle cx="52.3" cy="63.6" r="1.3" fill="#fff"/>
+      <circle cx="69" cy="65" r="3.8" fill="#2b2350"/><circle cx="70.3" cy="63.6" r="1.3" fill="#fff"/>
+      <ellipse cx="60" cy="74" rx="3.4" ry="2.5" fill="#ff7aa2"/>
+      <path d="M56 78 Q60 82 64 78" fill="none" stroke="#2b2350" stroke-width="1.6" stroke-linecap="round"/>
+      <g stroke="#9c94c4" stroke-width="1.2" stroke-linecap="round">
+        <line x1="52" y1="76" x2="38" y2="73"/><line x1="52" y1="78" x2="38" y2="80"/>
+        <line x1="68" y1="76" x2="82" y2="73"/><line x1="68" y1="78" x2="82" y2="80"/>
+      </g>
+      <g class="hat">
+        <polygon points="60,14 49,42 71,42" fill="#ffcf5a"/>
+        <path d="M54.6 28 L65.4 28" stroke="#7b5cff" stroke-width="3.5"/>
+        <circle cx="60" cy="13" r="4.5" fill="#fff"/>
+      </g>
+    </g>
+  </g>
+</svg>
+<svg class="dancer right" viewBox="0 0 120 145" aria-hidden="true">
+  <g class="all">
+    <path class="tail" d="M84 116 C106 120 114 100 106 88 C100 80 106 70 115 73" fill="none" stroke="#f4a7bb" stroke-width="4.5" stroke-linecap="round"/>
+    <g class="torso">
+    <ellipse cx="60" cy="108" rx="29" ry="28" fill="#dcd8f0"/>
+    <ellipse cx="60" cy="114" rx="18" ry="16" fill="#f8f6ff"/>
+    <g class="arm-l"><path d="M36 98 Q24 102 20 112" fill="none" stroke="#cfcae6" stroke-width="8" stroke-linecap="round"/><circle cx="20" cy="113" r="5" fill="#f4a7bb"/></g>
+    <g class="arm-r"><path d="M84 98 Q96 102 100 112" fill="none" stroke="#cfcae6" stroke-width="8" stroke-linecap="round"/><circle cx="100" cy="113" r="5" fill="#f4a7bb"/></g>
+    </g>
+    <ellipse class="foot-r" cx="75" cy="135" rx="11" ry="6" fill="#f4a7bb" stroke="#e48aa3" stroke-width="1.2"/>
+    <ellipse class="foot-l" cx="45" cy="135" rx="11" ry="6" fill="#f4a7bb" stroke="#e48aa3" stroke-width="1.2"/>
+    <g class="head">
+      <circle cx="35" cy="46" r="15" fill="#dcd8f0"/><circle cx="35" cy="46" r="9.5" fill="#f7b8c8"/>
+      <circle cx="85" cy="46" r="15" fill="#dcd8f0"/><circle cx="85" cy="46" r="9.5" fill="#f7b8c8"/>
+      <circle cx="60" cy="66" r="26" fill="#dcd8f0"/>
+      <ellipse cx="45" cy="74" rx="4.8" ry="2.8" fill="#ff9ec0" opacity=".75"/>
+      <ellipse cx="75" cy="74" rx="4.8" ry="2.8" fill="#ff9ec0" opacity=".75"/>
+      <circle cx="51" cy="65" r="3.8" fill="#2b2350"/><circle cx="52.3" cy="63.6" r="1.3" fill="#fff"/>
+      <circle cx="69" cy="65" r="3.8" fill="#2b2350"/><circle cx="70.3" cy="63.6" r="1.3" fill="#fff"/>
+      <ellipse cx="60" cy="74" rx="3.4" ry="2.5" fill="#ff7aa2"/>
+      <path d="M56 78 Q60 82 64 78" fill="none" stroke="#2b2350" stroke-width="1.6" stroke-linecap="round"/>
+      <g stroke="#9c94c4" stroke-width="1.2" stroke-linecap="round">
+        <line x1="52" y1="76" x2="38" y2="73"/><line x1="52" y1="78" x2="38" y2="80"/>
+        <line x1="68" y1="76" x2="82" y2="73"/><line x1="68" y1="78" x2="82" y2="80"/>
+      </g>
+      <g class="hat">
+        <polygon points="60,14 49,42 71,42" fill="#ffcf5a"/>
+        <path d="M54.6 28 L65.4 28" stroke="#7b5cff" stroke-width="3.5"/>
+        <circle cx="60" cy="13" r="4.5" fill="#fff"/>
+      </g>
+    </g>
+  </g>
+</svg>
+
 <div class="music" id="music" hidden>
   <div id="yt"></div>
   <span class="music-label" id="musicLabel">♪ 상자를 열면 음악이 나와요</span>
@@ -194,7 +303,7 @@ body{
 <script>
 (() => {
   /* ▼▼ 여기에 유튜브 주소를 붙여넣으세요 (비워두면 팡파레가 나와요) ▼▼ */
-  const YT_URL = 'https://youtu.be/770f-pwPe4o?si=FF1joNmzzPIvs4IA';
+  const YT_URL = '';
   /* ▲▲ 예: 'https://www.youtube.com/watch?v=xxxxxxxxxxx' 또는 'https://youtu.be/xxxxxxxxxxx?t=5' ▲▲ */
 
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
