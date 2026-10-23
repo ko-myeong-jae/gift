@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>서경이에게</title>
+
+<!-- 카톡/링크 미리보기 (저장소 이름을 gift가 아닌 걸로 하면 아래 주소 두 군데만 바꿔주세요) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="서경이에게">
+<meta property="og:description" content="랜덤박스가 도착했어요. 눌러서 열어보세요!">
+<meta property="og:image" content="https://ko-myeong-jae.github.io/gift/thumb.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://ko-myeong-jae.github.io/gift/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0f1030">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Nanum+Pen+Script&display=swap">
+<style>
+:root{
+  --night:#0f1030;
+  --night2:#2a1c58;
+  --violet:#7b5cff;
+  --violet-dk:#6246e0;
+  --lilac:#967cff;
+  --gold:#ffcf5a;
+  --gold-dk:#ffbe3c;
+  --text:#fff6e6;
+  --soft:#cfc6ff;
+  --paper:#fffdf7;
+  --ink:#2b2350;
+  --f-display:"Jua","Gowun Dodum","Apple SD Gothic Neo",sans-serif;
+  --f-ui:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-hand:"Nanum Pen Script","Gowun Dodum",cursive;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  background:linear-gradient(180deg,var(--night) 0%,var(--night2) 100%) fixed,var(--night);
+  color:var(--text);font-family:var(--f-ui);
+  overflow-x:hidden;-webkit-tap-highlight-color:transparent;word-break:keep-all;
+}
+#sky,#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#sky{z-index:0}#fx{z-index:20}
+
+.stage{
+  position:relative;z-index:2;min-height:100%;
+  display:grid;place-items:center;text-align:center;
+  padding-top:max(28px,env(safe-area-inset-top,0px));
+  padding-bottom:max(28px,env(safe-area-inset-bottom,0px));
+  padding-left:max(20px,env(safe-area-inset-left,0px));
+  padding-right:max(20px,env(safe-area-inset-right,0px));
+}
+
+/* ---------- 랜덤박스 ---------- */
+.intro{display:grid;justify-items:center;gap:30px;transition:opacity .5s,transform .5s}
+.intro.leave{opacity:0;transform:scale(.8)}
+.kicker{margin:0;font-size:13px;letter-spacing:.2em;color:var(--gold)}
+.headline{margin:8px 0 0;font-family:var(--f-display);font-weight:400;font-size:clamp(28px,8vw,36px);line-height:1.25}
+
+.boxwrap{position:relative;width:220px;height:230px;display:grid;place-items:center}
+.rays{
+  position:absolute;inset:-90px;border-radius:50%;opacity:0;
+  background:repeating-conic-gradient(from 0deg,rgba(255,207,90,.35) 0deg 8deg,transparent 8deg 22deg);
+  -webkit-mask:radial-gradient(circle,#000 20%,transparent 68%);mask:radial-gradient(circle,#000 20%,transparent 68%);
+  transition:opacity .6s;animation:spin 14s linear infinite;
+}
+.glow{position:absolute;inset:-40px;border-radius:50%;background:radial-gradient(circle,rgba(255,207,90,.35),transparent 65%);animation:breathe 2.4s ease-in-out infinite}
+.gift{position:relative;width:200px;height:210px;border:0;padding:0;background:none;cursor:pointer;animation:hop 2.4s ease-in-out infinite}
+.gift:focus-visible{outline:2px solid var(--gold);outline-offset:12px;border-radius:16px}
+.body{
+  position:absolute;left:10px;right:10px;bottom:0;height:130px;
+  background:var(--violet);border-radius:0 0 14px 14px;overflow:hidden;
+  display:flex;justify-content:space-around;align-items:center;padding-top:14px;
+}
+.body::before{content:"";position:absolute;inset:0 0 auto;height:16px;background:var(--violet-dk)}
+.body::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:30px;transform:translateX(-50%);background:var(--gold)}
+.q{font-family:var(--f-display);font-size:64px;color:#fff;line-height:1;position:relative;z-index:1}
+.lid{position:absolute;left:0;right:0;bottom:122px;height:88px;transition:transform .7s cubic-bezier(.2,.9,.3,1),opacity .7s}
+.lid-top{position:absolute;left:0;right:0;bottom:0;height:46px;background:var(--lilac);border-radius:12px}
+.lid-top::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:30px;transform:translateX(-50%);background:var(--gold)}
+.bow{position:absolute;bottom:40px;width:62px;height:46px;border:14px solid var(--gold);border-radius:50%}
+.bow-l{left:calc(50% - 62px);transform:rotate(-12deg)}
+.bow-r{right:calc(50% - 62px);transform:rotate(12deg)}
+.knot{position:absolute;bottom:34px;left:50%;width:30px;height:28px;transform:translateX(-50%);background:var(--gold-dk);border-radius:50%}
+.gift.shake{animation:shake .7s ease-in-out}
+.gift.open .lid{transform:translate(-40px,-190px) rotate(-35deg);opacity:0}
+.boxwrap.open .rays{opacity:1}
+.tap{margin:0;font-size:15px;color:var(--soft);animation:blink 1.8s ease-in-out infinite}
+
+/* ---------- 메시지 ---------- */
+.msg{display:grid;justify-items:center;gap:18px;max-width:420px;width:100%;opacity:0;transform:translateY(24px);transition:opacity .7s,transform .8s cubic-bezier(.2,.9,.25,1.2)}
+.msg.in{opacity:1;transform:none}
+.l{margin:0;opacity:0;transform:translateY(14px) scale(.96);transition:opacity .7s,transform .7s cubic-bezier(.2,1.3,.4,1)}
+.l.on{opacity:1;transform:none}
+.l1{font-family:var(--f-display);font-size:clamp(34px,10vw,46px);line-height:1.2;color:var(--gold);text-shadow:0 0 24px rgba(255,207,90,.45)}
+.l2,.l3{font-family:var(--f-display);font-size:clamp(22px,6.4vw,28px);line-height:1.35;text-wrap:balance}
+.l2 b{font-weight:400;color:var(--gold)}
+
+.more{
+  margin-top:14px;font-family:var(--f-display);font-size:18px;color:var(--ink);
+  background:var(--gold);border:0;border-radius:999px;padding:14px 26px;cursor:pointer;
+  box-shadow:0 8px 28px rgba(255,207,90,.35);
+  opacity:0;transform:scale(.8);pointer-events:none;transition:opacity .5s,transform .5s cubic-bezier(.2,1.5,.4,1);
+}
+.more.on{opacity:1;transform:none;pointer-events:auto;animation:nudge 2.2s ease-in-out 1s infinite}
+.more:active{transform:scale(.95)}
+.more:focus-visible{outline:2px solid #fff;outline-offset:4px}
+.more[hidden]{display:none}
+
+.note{
+  position:relative;margin-top:10px;width:100%;
+  background:var(--paper);color:var(--ink);border-radius:6px;
+  padding:30px 22px 26px;transform:rotate(-1.5deg) scale(.6);opacity:0;
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+  transition:opacity .5s,transform .7s cubic-bezier(.2,1.5,.4,1);
+}
+.note::before{content:"";position:absolute;top:-11px;left:50%;width:96px;height:24px;transform:translateX(-50%) rotate(2deg);background:rgba(150,124,255,.75);border-radius:2px}
+.note.on{opacity:1;transform:rotate(-1.5deg) scale(1)}
+.note p{margin:0;font-family:var(--f-hand);font-size:clamp(26px,7.6vw,31px);line-height:1.45}
+.note[hidden]{display:none}
+
+@keyframes hop{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes shake{0%,100%{transform:rotate(0)}15%{transform:rotate(-9deg)}30%{transform:rotate(8deg)}45%{transform:rotate(-7deg)}60%{transform:rotate(6deg)}75%{transform:rotate(-3deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{0%,100%{opacity:.6;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
+@keyframes blink{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes nudge{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+/* 유튜브 미니 플레이어 */
+.music{
+  position:fixed;z-index:15;left:50%;transform:translateX(-50%);
+  bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  display:grid;justify-items:center;gap:6px;
+  padding:8px 8px 6px;border-radius:12px;
+  background:rgba(15,16,48,.72);border:1px solid rgba(207,198,255,.25);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.music iframe{display:block;width:200px;height:113px;border:0;border-radius:6px}
+.music-label{font-size:12px;color:var(--soft)}
+.music.ask .music-label{color:var(--gold);font-weight:700;animation:blink 1.2s ease-in-out infinite}
+.music[hidden]{display:none}
+.stage.has-music{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
+
+@media (prefers-reduced-motion:reduce){
+  .gift,.glow,.rays,.tap,.more.on{animation:none}
+}
+</style>
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<div class="stage">
+  <section class="intro" id="intro">
+    <div>
+      <p class="kicker">퇴근 선물 도착</p>
+      <h1 class="headline">서경이에게</h1>
+    </div>
+    <div class="boxwrap" id="boxwrap">
+      <div class="rays"></div>
+      <div class="glow"></div>
+      <button class="gift" id="gift" type="button" aria-label="랜덤박스 열기">
+        <span class="body"><span class="q">?</span><span class="q">?</span></span>
+        <span class="lid">
+          <span class="bow bow-l"></span><span class="bow bow-r"></span><span class="knot"></span>
+          <span class="lid-top"></span>
+        </span>
+      </button>
+    </div>
+    <p class="tap" id="tap">상자를 눌러서 열어보세요</p>
+  </section>
+
+  <main class="msg" id="msg" hidden>
+    <p class="l l1">수고 많으셨습니다 ⭐</p>
+    <p class="l l2">서경이는 이제 <b>자유</b>입니다 ~</p>
+    <p class="l l3">얼른 집에가서 푹 쉬시길 바랍니다~</p>
+    <button class="more" id="more" type="button">하나 더 열어보기</button>
+    <div class="note" id="note" hidden>
+      <p>서경아 오늘 고생많았어~<br>얼굴 오래 못봐서 아쉬웠지만<br>다다음주에 얼른 보자아~</p>
+    </div>
+  </main>
+</div>
+
+<div class="music" id="music" hidden>
+  <div id="yt"></div>
+  <span class="music-label" id="musicLabel">♪ 상자를 열면 음악이 나와요</span>
+</div>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<script>
+(() => {
+  /* ▼▼ 여기에 유튜브 주소를 붙여넣으세요 (비워두면 팡파레가 나와요) ▼▼ */
+  const YT_URL = '';
+  /* ▲▲ 예: 'https://www.youtube.com/watch?v=xxxxxxxxxxx' 또는 'https://youtu.be/xxxxxxxxxxx?t=5' ▲▲ */
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sleep = ms => new Promise(r => setTimeout(r, reduce ? Math.min(ms, 80) : ms));
+  const $ = id => document.getElementById(id);
+
+  const sky = $('sky'), fx = $('fx');
+  const sctx = sky.getContext('2d'), fctx = fx.getContext('2d');
+  let W = 0, H = 0;
+  function resize(){
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    for (const [c, x] of [[sky, sctx], [fx, fctx]]){ c.width = W*dpr; c.height = H*dpr; x.setTransform(dpr,0,0,dpr,0,0); }
+  }
+  resize(); addEventListener('resize', resize);
+
+  function starPath(ctx, r){
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++){
+      const a = -Math.PI/2 + i*Math.PI/5, rr = i%2 ? r*.45 : r;
+      ctx.lineTo(Math.cos(a)*rr, Math.sin(a)*rr);
+    }
+    ctx.closePath(); ctx.fill();
+  }
+
+  /* 밤하늘 */
+  const dots = Array.from({length: 80}, () => ({x: Math.random(), y: Math.random(), r: Math.random()*1.3 + .3, ph: Math.random()*6, sp: Math.random()*.002 + .0007}));
+  function drawSky(t){
+    sctx.clearRect(0, 0, W, H);
+    for (const s of dots){
+      sctx.fillStyle = `rgba(255,244,225,${reduce ? .7 : .25 + .75*Math.abs(Math.sin(s.ph + t*s.sp))})`;
+      sctx.beginPath(); sctx.arc(s.x*W, s.y*H, s.r, 0, 7); sctx.fill();
+    }
+    if (!reduce) requestAnimationFrame(drawSky);
+  }
+  requestAnimationFrame(drawSky);
+
+  /* 색종이 + 별 */
+  const COLORS = ['#ffcf5a', '#7b5cff', '#967cff', '#7ee0c3', '#ff9ec0', '#ffffff'];
+  const pick = a => a[Math.floor(Math.random()*a.length)];
+  let parts = [], running = false, last = 0;
+
+  function burst(x, y, n = 130, power = 1){
+    if (reduce) n = Math.round(n/3);
+    for (let i = 0; i < n; i++){
+      const a = -Math.PI/2 + (Math.random() - .5)*Math.PI*1.6;
+      const sp = (Math.random()*11 + 5)*power;
+      const star = Math.random() < .28;
+      parts.push({
+        x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
+        w: star ? 0 : Math.random()*7 + 5, h: Math.random()*4 + 3, r: star ? Math.random()*7 + 5 : 0,
+        star, color: star ? '#ffcf5a' : pick(COLORS),
+        rot: Math.random()*6, vr: (Math.random() - .5)*.3, flip: Math.random()*6, vf: Math.random()*.2 + .1,
+        life: 150 + Math.random()*60, max: 210
+      });
+    }
+    if (!running){ running = true; last = performance.now(); requestAnimationFrame(tick); }
+  }
+  function tick(now){
+    const dt = Math.min((now - last)/16.67, 3); last = now;
+    fctx.clearRect(0, 0, W, H);
+    parts = parts.filter(p => p.life > 0 && p.y < H + 40);
+    for (const p of parts){
+      const d = Math.pow(.965, dt);
+      p.vx *= d; p.vy = p.vy*d + .22*dt;
+      if (p.vy > 3.2) p.vy = 3.2;              // 종이처럼 천천히 떨어지게
+      p.x += (p.vx + Math.sin(p.flip)*.6)*dt; p.y += p.vy*dt;
+      p.rot += p.vr*dt; p.flip += p.vf*dt; p.life -= dt;
+      fctx.globalAlpha = Math.min(1, p.life/40);
+      fctx.fillStyle = p.color;
+      fctx.save(); fctx.translate(p.x, p.y); fctx.rotate(p.rot);
+      if (p.star) starPath(fctx, p.r);
+      else { fctx.scale(1, Math.cos(p.flip)); fctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); }
+      fctx.restore();
+    }
+    fctx.globalAlpha = 1;
+    if (parts.length) requestAnimationFrame(tick); else { running = false; fctx.clearRect(0, 0, W, H); }
+  }
+  const center = el => { const r = el.getBoundingClientRect(); return [r.left + r.width/2, r.top + r.height/2]; };
+
+  /* 소리: 같은 폴더에 mr.mp3가 있으면 그 노래를 틀고, 없으면 짧은 팡파레를 직접 연주 */
+  let actx = null;
+  function getCtx(){
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+    } catch (e) {}
+    return actx;
+  }
+  function tone(freq, t, dur, vol = .16, type = 'triangle'){
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + .02);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(actx.destination);
+    o.start(t); o.stop(t + dur + .05);
+  }
+  const N = {C5:523.25, E5:659.25, G5:783.99, A5:880, B5:987.77, C6:1046.5, E6:1318.5, G6:1568};
+  function fanfare(delay = 0){
+    if (!getCtx()) return;
+    const t0 = actx.currentTime + delay;
+    const seq = [['C5',0,.16],['E5',.12,.16],['G5',.24,.16],['C6',.36,.5],['G5',.72,.14],['A5',.84,.14],['B5',.96,.14],['C6',1.08,1.2]];
+    for (const [n, o, d] of seq){ tone(N[n], t0 + o, d); tone(N[n]/2, t0 + o, d, .05, 'square'); }
+    for (const n of ['E5','G5']) tone(N[n], t0 + 1.08, 1.2, .07);
+    ['E6','G6','E6','G6'].forEach((n, i) => tone(N[n], t0 + 1.25 + i*.09, .3, .05, 'sine'));
+  }
+  function chime(){
+    if (!getCtx()) return;
+    const t = actx.currentTime;
+    ['G5','C6','E6'].forEach((n, i) => tone(N[n], t + i*.08, .7, .07, 'sine'));
+  }
+  /* 유튜브 */
+  function parseYT(u){
+    try {
+      const url = new URL(u);
+      let id = url.hostname.includes('youtu.be') ? url.pathname.slice(1)
+             : url.searchParams.get('v') || (url.pathname.match(/\/(?:embed|shorts|live)\/([\w-]{11})/) || [])[1];
+      const t = parseInt(url.searchParams.get('t') || url.searchParams.get('start') || '0', 10) || 0;
+      return id && /^[\w-]{11}$/.test(id) ? {id, start: t} : null;
+    } catch (e) { return null; }
+  }
+  const yt = YT_URL ? parseYT(YT_URL) : null;
+  let player = null, ytReady = false, ytFailed = false;
+  if (yt){
+    $('music').hidden = false;
+    document.querySelector('.stage').classList.add('has-music');
+    window.onYouTubeIframeAPIReady = () => {
+      player = new YT.Player('yt', {
+        width: 200, height: 113, videoId: yt.id,
+        playerVars: {playsinline: 1, start: yt.start, rel: 0, controls: 1},
+        events: {
+          onReady: () => { ytReady = true; },
+          onError: () => { ytFailed = true; },
+          onStateChange: e => { if (e.data === 1) { $('music').classList.remove('ask'); $('musicLabel').textContent = '♪ 재생 중'; } }
+        }
+      });
+    };
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    tag.onerror = () => { ytFailed = true; };
+    document.head.appendChild(tag);
+  }
+  function playYT(){
+    if (!yt || !ytReady || ytFailed || !player) return false;
+    try { player.unMute(); player.setVolume(85); player.playVideo(); } catch (e) { return false; }
+    // 폰에 따라 자동 재생이 막히면 팡파레를 대신 틀고, 플레이어를 직접 누르도록 안내
+    setTimeout(() => {
+      let st = -1; try { st = player.getPlayerState(); } catch (e) {}
+      if (st !== 1 && st !== 3){
+        fanfare(0);
+        $('music').classList.add('ask');
+        $('musicLabel').textContent = '▶ 여기를 눌러서 음악 틀기';
+      }
+    }, 2500);
+    return true;
+  }
+
+  function startMusic(){
+    getCtx();
+    if (playYT()) return;
+    getCtx(); // 탭하는 순간 소리 재생 권한을 받아둠
+    let fell = false;
+    const fallback = () => { if (!fell){ fell = true; fanfare(.72); } };
+    try {
+      const mr = new Audio('mr.mp3');
+      mr.volume = .8;
+      mr.addEventListener('error', fallback, {once: true});
+      const p = mr.play();
+      if (p) p.catch(fallback);
+    } catch (e) { fallback(); }
+  }
+
+  /* 상자 열기 */
+  const gift = $('gift');
+  gift.addEventListener('click', async () => {
+    startMusic();
+    gift.disabled = true;
+    $('tap').style.visibility = 'hidden';
+    gift.classList.add('shake');
+    await sleep(720);
+    gift.classList.remove('shake');
+    gift.classList.add('open');
+    $('boxwrap').classList.add('open');
+    burst(...center(gift), 150, 1.1);
+    await sleep(900);
+    $('intro').classList.add('leave');
+    await sleep(500);
+    $('intro').hidden = true;
+    const msg = $('msg');
+    msg.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => msg.classList.add('in')));
+    await sleep(500);
+    for (const l of msg.querySelectorAll('.l')){
+      l.classList.add('on');
+      await sleep(1100);
+    }
+    $('more').classList.add('on');
+  }, {once: true});
+
+  /* 마지막 쪽지 */
+  $('more').addEventListener('click', async () => {
+    const btn = $('more'), note = $('note');
+    chime();
+    burst(...center(btn), 70, .8);
+    btn.hidden = true;
+    note.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => note.classList.add('on')));
+    await sleep(300);
+    note.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'center'});
+  }, {once: true});
+})();
+</script>
+</body>
+</html>
