@@ -90,7 +90,12 @@ body{
 .gift.shake{animation:shake .7s ease-in-out}
 .gift.open .lid{transform:translate(-40px,-190px) rotate(-35deg);opacity:0}
 .boxwrap.open .rays{opacity:1}
-.tap{margin:0;font-size:15px;color:var(--soft);animation:blink 1.8s ease-in-out infinite}
+.tap{margin:0;font-size:15px;line-height:1.5;color:var(--soft);animation:blink 1.8s ease-in-out infinite}
+.tap.wait{font-size:16px;color:var(--text)}
+.tap.ready{font-family:var(--f-display);font-size:clamp(24px,7vw,30px);color:var(--gold);text-shadow:0 0 18px rgba(255,207,90,.5);animation:readyPop .6s cubic-bezier(.2,1.6,.4,1) both}
+.tap.ready span{display:block;margin-top:4px;font-family:var(--f-ui);font-size:15px;color:var(--soft);text-shadow:none;animation:blink 1.6s ease-in-out .6s infinite}
+.gift.locked{filter:grayscale(.45) brightness(.7);cursor:wait;animation-duration:4s}
+@keyframes readyPop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
 
 /* ---------- 메시지 ---------- */
 .msg{display:grid;justify-items:center;gap:18px;max-width:420px;width:100%;opacity:0;transform:translateY(24px);transition:opacity .7s,transform .8s cubic-bezier(.2,.9,.25,1.2)}
@@ -428,35 +433,108 @@ body{
   }
   const yt = YT_URL ? parseYT(YT_URL) : null;
   let player = null, ytReady = false, ytFailed = false;
+  let primed = false, priming = false, wantSound = false, started = false, unlocked = !YT_URL;
+  function setTap(html, cls){ const t = $('tap'); t.className = 'tap ' + (cls || ''); t.innerHTML = html; }
+  function lockBox(){
+    $('gift').disabled = true; $('gift').classList.add('locked');
+    setTap('아직 상자가 열리기 전입니다<br>조금만 기다려 주세요,,', 'wait');
+  }
+  function unlockBox(){
+    if (unlocked) return;
+    unlocked = true;
+    $('gift').disabled = false; $('gift').classList.remove('locked');
+    setTap('상자가 열렸습니다!!<span>상자를 눌러주세요</span>', 'ready');
+    const r = $('gift').getBoundingClientRect();
+    burst(r.left + r.width/2, r.top + r.height/2, 40, .6);
+  }
+  const label = t => { $('musicLabel').textContent = t; };
+  /* 광고 대책: 페이지가 열리자마자 음소거로 미리 재생해서 광고를 먼저 흘려보내고,
+     본 영상이 시작되면 처음으로 되감아 멈춰둠 → 상자를 열 때 바로 노래 시작 */
+  function soundOn(){
+    try { player.unMute(); player.setVolume(85); } catch (e) {}
+  }
   if (yt){
     $('music').hidden = false;
     document.querySelector('.stage').classList.add('has-music');
+    lockBox();
+    setTimeout(unlockBox, 45000);   // 혹시 끝까지 준비가 안 되면 45초 뒤엔 그냥 열 수 있게
     window.onYouTubeIframeAPIReady = () => {
       player = new YT.Player('yt', {
         width: 200, height: 113, videoId: yt.id,
-        playerVars: {playsinline: 1, start: yt.start, rel: 0, controls: 1},
+        host: 'https://www.youtube-nocookie.com',
+        playerVars: {playsinline: 1, start: yt.start, rel: 0, controls: 1, mute: 1, autoplay: 1},
         events: {
-          onReady: () => { ytReady = true; },
-          onError: () => { ytFailed = true; },
-          onStateChange: e => { if (e.data === 1) { $('music').classList.remove('ask'); $('musicLabel').textContent = '♪ 재생 중'; } }
+          onReady: () => {
+            ytReady = true;
+            try { player.mute(); player.playVideo(); } catch (e) {}
+            label('♪ 음악 준비 중');
+            // 폰이 미리 재생 자체를 막은 경우: 플레이어를 한 번 눌러달라고 안내 (소리는 꺼진 채로 재생됨)
+            setTimeout(() => {
+              let st = -1; try { st = player.getPlayerState(); } catch (e) {}
+              if (!primed && st !== 1 && st !== 3 && st !== 2){
+                $('music').classList.add('ask');
+                label('▶ 여기를 한 번 눌러주세요');
+                setTap('아직 상자가 열리기 전입니다<br>아래 ▶를 한 번 눌러주세요', 'wait');
+              }
+            }, 6000);
+          },
+          onError: () => { ytFailed = true; unlockBox(); },
+          onStateChange: e => {
+            if (e.data !== 1) return;            // 1 = 본 영상 재생 (광고 아님)
+            if (!wantSound){
+              if (!primed && !priming){
+                priming = true;
+                try { player.pauseVideo(); player.seekTo(yt.start, true); } catch (err) {}
+                setTimeout(() => {
+                  primed = true;
+                  $('music').classList.remove('ask');
+                  label('♪ 준비 완료');
+                  unlockBox();
+                }, 400);
+              }
+              return;
+            }
+            if (!started){
+              started = true;
+              if (!primed){ try { player.seekTo(yt.start, true); } catch (err) {} }
+              soundOn();
+            }
+            $('music').classList.remove('ask');
+            label('♪ 재생 중');
+          }
         }
       });
     };
     const tag = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
-    tag.onerror = () => { ytFailed = true; };
+    tag.onerror = () => { ytFailed = true; unlockBox(); };
     document.head.appendChild(tag);
   }
   function playYT(){
     if (!yt || !ytReady || ytFailed || !player) return false;
-    try { player.unMute(); player.setVolume(85); player.playVideo(); } catch (e) { return false; }
-    // 폰에 따라 자동 재생이 막히면 팡파레를 대신 틀고, 플레이어를 직접 누르도록 안내
+    wantSound = true;
+    if (primed){
+      started = true;
+      try { player.seekTo(yt.start, true); player.unMute(); player.setVolume(0); player.playVideo(); } catch (e) { return false; }
+      let v = 0;
+      const fade = setInterval(() => {
+        v += 8;
+        try { player.setVolume(Math.min(v, 90)); } catch (e) {}
+        if (v >= 90) clearInterval(fade);
+      }, 80);
+    } else {
+      // 아직 광고 중이면 광고 소리는 계속 끄고, 팡파레를 먼저 튼 뒤 본 영상이 시작되면 처음부터 소리 켜기
+      fanfare(.72);
+      label('♪ 곧 노래가 나와요');
+      try { player.playVideo(); } catch (e) {}
+    }
+    // 폰이 소리 켜기를 막으면 플레이어를 직접 누르도록 안내
     setTimeout(() => {
-      let st = -1; try { st = player.getPlayerState(); } catch (e) {}
-      if (st !== 1 && st !== 3){
-        fanfare(0);
+      let st = -1, muted = true;
+      try { st = player.getPlayerState(); muted = player.isMuted(); } catch (e) {}
+      if (started && (st !== 1 || muted)){
         $('music').classList.add('ask');
-        $('musicLabel').textContent = '▶ 여기를 눌러서 음악 틀기';
+        label('▶ 여기를 눌러서 음악 틀기');
       }
     }, 2500);
     return true;
@@ -502,6 +580,7 @@ body{
       await sleep(1100);
     }
     $('more').classList.add('on');
+    $('more').scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'center'});
   }, {once: true});
 
   /* 마지막 쪽지 */
